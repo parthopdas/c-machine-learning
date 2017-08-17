@@ -84,28 +84,37 @@ y = cell2mat(arrayfun(@(x) makeYVec(x), y, 'UniformOutput', false));
 hTheta = a3;
 
 function val = regTheta(theta)
-    thetaNoBias = theta(:, 2:size(theta, 2));
+    thetaNoBias = theta(:, 2:end);
     val = sum(sum(thetaNoBias .* thetaNoBias));
 end 
 
-J = ((-1 / m) .* sum(sum((y(:, [1:K]) .* log(hTheta) .+ (1 .- y(:, [1:K])) .* log(1 .- hTheta))))) ...
-    .+ (lambda/(2 * m) .* (regTheta(Theta1) + regTheta(Theta2)));
+J = ((-1 / m) .* sum(sum((y(:, [1:K]) .* log(hTheta) .+ (1 .- y(:, [1:K])) .* log(1 .- hTheta)))));
+JRegDelta = (lambda/(2 * m) .* (regTheta(Theta1) + regTheta(Theta2)));
+J = J .+ JRegDelta;
 
+% Backpropagation %
 
+% Step 1: Feedforward 
+% - done above
 
+% Step 2: Set delta3
+d3 = a3 - y(:, 1:K);  
 
+% Step 3: Set delta2
+d2 = (d3 * Theta2(:, 2:end)) .* sigmoidGradient(z2);
 
+% Step 4: Populate graidient accumulators
+D2 = d3' * a2;
+D1 = d2' * a1;
 
+% Step 5: Unregularized gradients
+L1 = eye(size(Theta1, 2));
+L1(1, 1) = 0;
+Theta1_grad = (1/m) .* D1 + ((lambda/m) * L1 * Theta1')';
 
-
-
-
-
-
-
-
-
-
+L2 = eye(size(Theta2, 2));
+L2(1, 1) = 0;
+Theta2_grad = (1/m) .* D2 + ((lambda/m) * L2 * Theta2')';
 
 % -------------------------------------------------------------
 
