@@ -62,7 +62,34 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+K = num_labels;
 
+% Feedforward
+a1 = X;
+a1 = [ones(size(a1, 1), 1) a1];
+
+z2 = a1 * Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(size(a2, 1), 1) a2];
+
+z3 = a2 * Theta2';
+a3 = sigmoid(z3);
+
+% Cost function
+function yVec = makeYVec(y)
+    yVec = zeros(1,10);
+    yVec(y) = 1;
+end
+y = cell2mat(arrayfun(@(x) makeYVec(x), y, 'UniformOutput', false));
+hTheta = a3;
+
+function val = regTheta(theta)
+    thetaNoBias = theta(:, 2:size(theta, 2));
+    val = sum(sum(thetaNoBias .* thetaNoBias));
+end 
+
+J = ((-1 / m) .* sum(sum((y(:, [1:K]) .* log(hTheta) .+ (1 .- y(:, [1:K])) .* log(1 .- hTheta))))) ...
+    .+ (lambda/(2 * m) .* (regTheta(Theta1) + regTheta(Theta2)));
 
 
 
