@@ -8,8 +8,8 @@ function [C, sigma] = dataset3Params(X, y, Xval, yval)
 %
 
 % You need to return the following variables correctly.
-C = 1;
-sigma = 0.3;
+C = 0;
+sigma = 0;
 
 % ====================== YOUR CODE HERE ======================
 % Instructions: Fill in this function to return the optimal C and sigma
@@ -22,12 +22,26 @@ sigma = 0.3;
 %  Note: You can compute the prediction error using 
 %        mean(double(predictions ~= yval))
 %
+CCandidates = [0.01 0.03 0.1 0.3 1 3 10 30];
+sCandidates = [0.01 0.03 0.1 0.3 1 3 10 30];
 
+errors = [];
+for CCandidate = CCandidates
+    for sCandidate = sCandidates
+        printf('dataset3Params: Starting iteration with sigma = %d & C = %d.\n', sCandidate, CCandidate);
+        model = svmTrain(X, y, CCandidate, @(x1, x2) gaussianKernel(x1, x2, sCandidate)); 
+        predictions = svmPredict(model, Xval);
+        error = mean(double(predictions ~= yval));
+        errors = [errors; [CCandidate sCandidate error]];
+        printf('dataset3Params: Done iterating with sigma = %d & C = %d. Error = %d.\n', sCandidate, CCandidate, error);
+    end
+end
 
+[minError rowInd] = min(errors(:, 3));
+C = errors(rowInd, :)(1);
+sigma = errors(rowInd, :)(2);
 
-
-
-
+printf('dataset3Params: C = %d, sigma = %d has the least error %d.\n', C, sigma, minError);
 
 % =========================================================================
 
